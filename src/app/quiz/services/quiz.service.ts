@@ -7,6 +7,10 @@ export class QuizService {
   currentQuestionIndex = signal<number>(0);
   currentQuestion = computed(() => this.questions()[this.currentQuestionIndex()].question);
 
+  goToNextQuestion(): void {
+    this.currentQuestionIndex.set(this.currentQuestionIndex() + 1);
+  }
+
   getMockQuestions(): QuestionInterface[] {
     return [
       {
