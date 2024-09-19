@@ -8,7 +8,7 @@ export class QuizService {
   currentAnswer = signal<string | null>(null);
   correctAnswersCount = signal<number>(0);
   currentQuestion = computed(() => this.questions()[this.currentQuestionIndex()]);
-  showResult = computed(() => this.currentQuestionIndex() === this.questions().length - 1);
+  showResult = computed(() => this.currentQuestionIndex() === this.questions().length);
   currentQuestionAnswers = computed(() => this.shuffleAnswers(this.currentQuestion()));
 
   shuffleAnswers(question: QuestionInterface): string[] {
