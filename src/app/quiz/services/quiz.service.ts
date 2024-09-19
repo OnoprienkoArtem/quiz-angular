@@ -5,8 +5,18 @@ import { QuestionInterface } from "../type/question.interface";
 export class QuizService {
   questions = signal<QuestionInterface[]>(this.getMockQuestions());
   currentQuestionIndex = signal<number>(0);
-  currentQuestion = computed(() => this.questions()[this.currentQuestionIndex()].question);
+  currentQuestion = computed(() => this.questions()[this.currentQuestionIndex()]);
   showResult = computed(() => this.currentQuestionIndex() === this.questions().length - 1);
+  currentQuestionAnswers = computed(() => this.shuffleAnswers(this.currentQuestion()));
+
+  shuffleAnswers(question: QuestionInterface): string[] {
+    const unshuffleAnswers = [question.correctAnswer, ...question.incorrectAnswers];
+
+    return unshuffleAnswers
+      .map(a => ({ sort: Math.random(), value: a}))
+      .sort((a, b) => a.sort - b.sort)
+      .map(a => a.value);
+  }
 
   goToNextQuestion(): void {
     const currentQuestionIndex = this.showResult()
