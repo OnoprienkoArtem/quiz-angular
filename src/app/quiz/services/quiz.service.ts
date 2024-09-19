@@ -38,6 +38,7 @@ export class QuizService {
 
   restart(): void {
     this.currentQuestionIndex.set(0);
+    this.correctAnswersCount.set(0);
   }
 
   getMockQuestions(): QuestionInterface[] {
