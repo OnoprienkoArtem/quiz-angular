@@ -1,9 +1,14 @@
-import { computed, Injectable, signal } from "@angular/core";
+import { computed, inject, Injectable, signal } from "@angular/core";
 import { QuestionInterface } from "../type/question.interface";
+import { HttpClient } from "@angular/common/http";
+import { map, Observable } from "rxjs";
+import { BackendQuestionInterface } from "../type/backendQuestion.interface";
 
 @Injectable({ providedIn: 'root' })
 export class QuizService {
-  questions = signal<QuestionInterface[]>(this.getMockQuestions());
+  http = inject(HttpClient);
+
+  questions = signal<QuestionInterface[]>([]);
   currentQuestionIndex = signal<number>(0);
   currentAnswer = signal<string | null>(null);
   correctAnswersCount = signal<number>(0);
@@ -41,70 +46,22 @@ export class QuizService {
     this.correctAnswersCount.set(0);
   }
 
-  getMockQuestions(): QuestionInterface[] {
-    return [
-      {
-        question: 'What does CSS stand for?',
-        incorrectAnswers: [
-          'Computer Style Sheets',
-          'Creative Style Sheets',
-          'Colorful Style Sheets',
-        ],
-        correctAnswer: 'Cascading Style Sheets',
-      },
+  getQuestions(): Observable<QuestionInterface[]> {
+    const apiUrl = 'https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&type=multiple';
 
-      {
-        question:
-          'Where in an HTML document is the correct place to refer to an external style sheet?',
-        incorrectAnswers: [
-          'In the <body> section',
-          'At the end of the document',
-          "You can't refer to an external style sheet",
-        ],
-        correctAnswer: 'In the <head> section',
-      },
-      {
-        question: 'Which HTML tag is used to define an internal style sheet?',
-        incorrectAnswers: ['<script>', '<headStyle>', '<css>'],
-        correctAnswer: '<style>',
-      },
-      {
-        question: 'Which HTML attribute is used to define inline styles?',
-        incorrectAnswers: ['class', 'font', 'styles'],
-        correctAnswer: 'style',
-      },
-      {
-        question: 'Which is the correct CSS syntax?',
-        incorrectAnswers: [
-          '{body:color=black;}',
-          '{body;color:black;}',
-          'body:color=black;',
-        ],
-        correctAnswer: 'body {color: black;}',
-      },
-      {
-        question: 'How do you insert a comment in a CSS file?',
-        incorrectAnswers: [
-          "' this is a comment",
-          '// this is a comment',
-          '// this is a comment //',
-        ],
-        correctAnswer: '/* this is a comment */',
-      },
-      {
-        question: 'Which property is used to change the background color?',
-        incorrectAnswers: ['color', 'bgcolor', 'bgColor'],
-        correctAnswer: 'background-color',
-      },
-      {
-        question: 'How do you add a background color for all <h1> elements?',
-        incorrectAnswers: [
-          'all.h1 {background-color:#FFFFFF;}',
-          'h1.setAll {background-color:#FFFFFF;}',
-          'h1.all {background-color:#FFFFFF;}',
-        ],
-        correctAnswer: 'h1 {background-color:#FFFFFF;}',
-      },
-    ];
+    return this.http.get<{results: BackendQuestionInterface[]}>(apiUrl).pipe(
+      map(response => this.normalizeQuestions(response.results)),
+    );
+  }
+
+  normalizeQuestions(beckendQuestions: BackendQuestionInterface[]): QuestionInterface[]  {
+    return beckendQuestions.map(beckendQuestion => {
+      const incorrectAnswers = beckendQuestion.incorrect_answers.map(incorrectAnswer => decodeURIComponent(incorrectAnswer));
+      return {
+        question: decodeURIComponent(beckendQuestion.question),
+        correctAnswer: decodeURIComponent(beckendQuestion.correct_answer),
+        incorrectAnswers,
+      }
+    });
   }
 }

@@ -10,7 +10,7 @@
     </div>
   }
 
-  @if (!quizService.showResult()) {
+  @if (!quizService.showResult() && quizService.questions().length > 0) {
     <div>
       <div class="score">Question {{ quizService.currentQuestionIndex() + 1 }}/{{ quizService.questions().length }}</div>
       <quiz-question />
