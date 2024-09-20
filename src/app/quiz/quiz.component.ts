@@ -14,8 +14,9 @@ export class QuizComponent implements OnInit {
   quizService = inject(QuizService);
 
   ngOnInit(): void {
-    this.quizService.getQuestions().subscribe(questions => {
-      this.quizService.questions.set(questions);
+    this.quizService.getQuestions().subscribe({
+      next: questions => this.quizService.questions.set(questions),
+      error: err => this.quizService.error.set(err.message),
     });
   }
 }
